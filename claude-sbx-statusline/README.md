@@ -84,9 +84,11 @@ config file; CLI flags override those. Themes: `dark`, `light`, `nord`, `tokyo-n
      silently outrank anything you edit there).
 
   The hook creates `settings.json` if missing and leaves every other key untouched — only
-  `statusLine` is set (replacing a prior one if present) — then `chown`s `~/.claude` back to the
-  `agent` user. Re-running is idempotent. The temp file is created inside `~/.claude` so the final
-  `mv` is an atomic same-filesystem rename rather than a cross-device copy.
+  `statusLine` is set (replacing a prior one if present) — then `chown`s `~/.claude` and
+  `settings.json` back to the `agent` user. The chown is deliberately *not* recursive: read-only
+  mounts are commonly bound under `~/.claude` (such as `~/.claude/skills`), and a `chown -R` would
+  fail on them and abort the hook. Re-running is idempotent. The temp file is created inside
+  `~/.claude` so the final `mv` is an atomic same-filesystem rename rather than a cross-device copy.
 - **`files/home/.claude/claude-powerline.json`** is copied to `~/.claude/claude-powerline.json`
   at sandbox start.
 

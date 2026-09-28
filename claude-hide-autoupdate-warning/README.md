@@ -32,9 +32,12 @@ effect:
   check entirely, which is what suppresses the warning.
 - **`autoUpdaterStatus: "disabled"`** is merged into `~/.claude/settings.json`
   by the `install` hook (run as root) using `jq`. It creates the file if
-  missing and leaves every other key untouched, then `chown`s `~/.claude` back
-  to the `agent` user. The temp file is created inside `~/.claude` so the final
-  `mv` is an atomic same-filesystem rename. Re-running is idempotent.
+  missing and leaves every other key untouched, then `chown`s `~/.claude` and
+  `settings.json` back to the `agent` user. The chown is deliberately *not*
+  recursive — read-only mounts are commonly bound under `~/.claude` (such as
+  `~/.claude/skills`), and a `chown -R` would fail on them and abort the hook.
+  The temp file is created inside `~/.claude` so the final `mv` is an atomic
+  same-filesystem rename. Re-running is idempotent.
 
 The settings key is a belt-and-suspenders fallback — it has been reported
 ignored in some Claude Code versions

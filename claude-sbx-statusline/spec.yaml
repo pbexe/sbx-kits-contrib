@@ -34,7 +34,10 @@ commands:
         tmp=$(mktemp -p /home/agent/.claude)
         jq --arg cmd "$bin" '.statusLine = {type: "command", command: $cmd}' "$f" > "$tmp"
         mv "$tmp" "$f"
-        chown -R agent:agent /home/agent/.claude
+        # Chown only what this hook touched. A recursive chown of ~/.claude
+        # fails outright: read-only mounts are commonly bound underneath it
+        # (e.g. ~/.claude/skills), and the chown errors abort the hook.
+        chown agent:agent /home/agent/.claude "$f"
       user: "0"
       description: Install @owloops/claude-powerline globally and point the statusLine key in ~/.claude/settings.json at it (jq merge, so all other keys are preserved; any existing statusLine is replaced by design)
 
